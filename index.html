@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RuVideo — видеоплатформа</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;900&family=Golos+Text:wght@400;500;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<header class="topbar">
+  <a href="#/" class="logo"><span class="logo-mark">▶</span>RuVideo</a>
+
+  <form class="searchbar" id="searchForm">
+    <input id="searchInput" type="search" placeholder="Поиск видео…  ( / )" autocomplete="off">
+    <button class="search-btn" aria-label="Найти">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></svg>
+    </button>
+  </form>
+
+  <div class="topbar-right">
+    <button class="icon-btn" id="themeToggle" aria-label="Сменить тему">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    </button>
+    <div id="authArea" class="auth-area"></div>
+  </div>
+</header>
+
+<main class="content">
+
+  <!-- главная -->
+  <section id="view-home">
+    <div class="chips" id="sortChips">
+      <button class="chip active" data-sort="new">Свежие</button>
+      <button class="chip" data-sort="top">Популярные</button>
+    </div>
+    <p class="muted" id="searchHint" hidden style="margin:-12px 0 18px"></p>
+    <div class="grid" id="grid"></div>
+    <div class="empty" id="emptyHome" hidden>
+      <div class="empty-icon">🎬</div>
+      <h2>Здесь пока пусто</h2>
+      <p class="muted">Станьте первым автором — загрузите видео.</p>
+    </div>
+  </section>
+
+  <!-- просмотр -->
+  <section id="view-watch" hidden>
+    <div class="watch">
+      <div class="watch-main">
+        <div class="player"><video id="player" controls playsinline preload="metadata"></video></div>
+        <h1 class="watch-title" id="wTitle"></h1>
+
+        <div class="watch-bar">
+          <div class="watch-author">
+            <span class="avatar-slot" id="wAva"></span>
+            <div class="watch-author-info">
+              <b id="wAuthor"></b>
+              <span class="muted" id="wDate"></span>
+            </div>
+            <button class="btn btn-outline" id="subBtn" hidden>Подписаться</button>
+          </div>
+          <div class="watch-actions">
+            <div class="rate-group">
+              <button class="pill-btn" id="likeBtn" title="Нравится">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
+                <span id="likeCount">0</span>
+              </button>
+              <span class="rate-sep"></span>
+              <button class="pill-btn flip" id="dislikeBtn" title="Не нравится">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
+              </button>
+            </div>
+
+            <!-- скорость воспроизведения -->
+            <div class="speed-wrap">
+              <button class="pill-btn" id="speedBtn" title="Скорость воспроизведения">⚡ <span id="speedLabel">1×</span></button>
+              <div class="speed-menu" id="speedMenu" hidden></div>
+            </div>
+
+            <button class="pill-btn" id="shareBtn">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+              Поделиться
+            </button>
+            <button class="pill-btn danger" id="deleteBtn" hidden title="Удалить">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="desc open">
+          <p class="desc-head"><b id="wViews"></b></p>
+          <div class="desc-text" id="wDesc"></div>
+        </div>
+
+        <section class="comments">
+          <h2 class="section-title"><span id="commentsCount">0</span> комментариев</h2>
+          <form id="commentForm" class="comment-form" hidden>
+            <input id="commentInput" maxlength="2000" placeholder="Написать комментарий…" autocomplete="off" required>
+            <button class="btn btn-accent" type="submit">Отправить</button>
+          </form>
+          <p class="muted" id="commentHint" hidden>Чтобы комментировать, <a href="#" id="loginLink">войдите</a>.</p>
+          <div id="commentsList"></div>
+        </section>
+      </div>
+
+      <aside class="watch-next">
+        <h2 class="section-title">Далее</h2>
+        <div id="nextList"></div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- загрузка -->
+  <section id="view-upload" hidden>
+    <div class="page-narrow">
+      <h1 class="page-title">Загрузка видео</h1>
+      <form id="uploadForm">
+        <label class="dropzone" id="dropzone">
+          <input type="file" id="videoFile" accept="video/mp4,video/webm,video/ogg,video/quicktime" hidden>
+          <div class="dz-icon">
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          </div>
+          <p><b>Перетащите видео сюда</b> или нажмите для выбора файла</p>
+          <p class="muted" id="fileMeta">MP4, WebM, MOV или OGG · до 2 ГБ</p>
+        </label>
+        <div class="progress" id="progressWrap" hidden><div class="progress-bar" id="progressBar"></div></div>
+
+        <label class="field"><span>Название <b class="req">*</b></span>
+          <input id="upTitle" maxlength="200" required placeholder="Моё первое видео">
+        </label>
+        <label class="field"><span>Описание</span>
+          <textarea id="upDesc" rows="5" maxlength="5000" placeholder="О чём это видео…"></textarea>
+        </label>
+        <button class="btn btn-accent btn-lg" id="publishBtn" type="submit">Опубликовать</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- студия -->
+  <section id="view-studio" hidden>
+    <h1 class="page-title">🎛 Студия RuVideo</h1>
+    <div class="stat-cards" id="statCards"></div>
+    <div class="studio-grid">
+      <div class="panel">
+        <h2 class="section-title">Просмотры по видео</h2>
+        <div class="chart" id="viewsChart"></div>
+      </div>
+      <div class="panel">
+        <h2 class="section-title">Мои видео</h2>
+        <div id="studioTable"></div>
+      </div>
+    </div>
+    <div class="panel" style="margin-top:18px">
+      <h2 class="section-title">💬 Комментарии к моим видео</h2>
+      <div id="studioComments"></div>
+    </div>
+  </section>
+
+</main>
+
+<!-- модальное окно входа/регистрации -->
+<div class="modal-wrap" id="authModal" hidden>
+  <div class="modal">
+    <button class="icon-btn modal-close" id="authClose" aria-label="Закрыть">✕</button>
+    <div class="tabs">
+      <button class="tab active" data-tab="login" type="button">Вход</button>
+      <button class="tab" data-tab="register" type="button">Регистрация</button>
+    </div>
+    <form id="authForm">
+      <label class="field"><span>Ник</span>
+        <input id="authUser" required minlength="3" maxlength="30" autocomplete="username"></label>
+      <label class="field"><span>Пароль</span>
+        <input id="authPass" type="password" required minlength="6" autocomplete="current-password"></label>
+      <p class="form-error" id="authError"></p>
+      <button class="btn btn-accent btn-lg" type="submit" id="authSubmit">Войти</button>
+    </form>
+  </div>
+</div>
+
+<div id="toasts"></div>
+<script src="/static/app.js"></script>
+</body>
+</html>

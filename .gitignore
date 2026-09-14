@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+ruvideo.db
+static/uploads/*
+.env
+venv/

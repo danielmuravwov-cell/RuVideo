@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: ruvideo          
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn --workers 2 --threads 2 --timeout 300 --bind 0.0.0.0:$PORT server:app
+    autoDeploy: true
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
