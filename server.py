@@ -20,7 +20,7 @@ ALLOWED_IMAGE = {'jpg', 'jpeg', 'png', 'webp', 'gif'}
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 app = Flask(__name__)
-app.secret_key = 'замените-на-длинную-случайную-строку'
+app.secret_key = os.getenv('SECRET_KEY', 'dev-key')
 app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 ** 3   # 2 ГБ
 
 
