@@ -6,43 +6,96 @@
   <title>RuVideo — видеоплатформа</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;900&family=Golos+Text:wght@400;500;600;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
 
 <header class="topbar">
-  <a href="#/" class="logo"><span class="logo-mark">▶</span>RuVideo</a>
+  <div class="tb-left">
+    <button class="icon-btn" id="burger" aria-label="Меню">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </button>
+    <a href="#/" class="logo"><span class="logo-mark">▶</span><span class="logo-text">RuVideo</span></a>
+  </div>
 
   <form class="searchbar" id="searchForm">
-    <input id="searchInput" type="search" placeholder="Поиск видео…  ( / )" autocomplete="off">
+    <input id="searchInput" type="search" placeholder="Введите запрос" autocomplete="off">
     <button class="search-btn" aria-label="Найти">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></svg>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M20.87 20.17l-5.59-5.59A6.96 6.96 0 0 0 17 10c0-3.87-3.13-7-7-7s-7 3.13-7 7 3.13 7 7 7c1.71 0 3.28-.61 4.58-1.72l5.59 5.59zM10 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/></svg>
+    </button>
+    <button type="button" class="mic-btn" id="micBtn" title="Голосовой поиск (скоро)">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11z"/></svg>
     </button>
   </form>
 
-  <div class="topbar-right">
-    <button class="icon-btn" id="themeToggle" aria-label="Сменить тему">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-    </button>
-    <div id="authArea" class="auth-area"></div>
-  </div>
+  <div class="tb-right" id="authArea"></div>
 </header>
+
+<nav class="sidebar" id="sidebar">
+  <a class="side-item active" data-nav="home" href="#/">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M4 10v10h5v-6h6v6h5V10l-8-7z"/></svg><span>Главная</span>
+  </a>
+  <a class="side-item" data-nav="shorts" href="#/shorts">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M17.77 10.32l-1.2-.5L18 9.06a3.74 3.74 0 0 0-3.5-6.62L6 6.94a3.74 3.74 0 0 0 .23 6.74l1.2.5L6 14.94a3.74 3.74 0 0 0 3.5 6.62l8.5-4.5a3.74 3.74 0 0 0-.23-6.74zM10 14.65v-5.3L15 12z"/></svg><span>Shorts</span>
+  </a>
+  <a class="side-item" data-nav="feed" href="#/feed">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M10 18v-6l5 3zm7-15H7v2h10zm3 4H4v2h16zm2 4H2v10h20z"/></svg><span>Подписки</span>
+  </a>
+  <div class="side-sep"></div>
+  <a class="side-item" data-nav="upload" href="#/upload">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6z"/></svg><span>Загрузить видео</span>
+  </a>
+  <a class="side-item" href="#" id="navChannel">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4zm0 2c-4 0-8 2-8 5v1h16v-1c0-3-4-5-8-5z"/></svg><span>Мой канал</span>
+  </a>
+  <a class="side-item" data-nav="studio" href="#/studio">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M5 9h3v11H5zm5.5-5h3v16h-3zM16 13h3v7h-3z"/></svg><span>Студия</span>
+  </a>
+  <div class="side-sep"></div>
+  <a class="side-item" href="#" id="navTheme">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36A7 7 0 0 1 12 3z"/></svg><span>Тема</span>
+  </a>
+  <p class="side-note">RuVideo © 2026<br>учебный проект</p>
+</nav>
 
 <main class="content">
 
   <!-- главная -->
   <section id="view-home">
     <div class="chips" id="sortChips">
-      <button class="chip active" data-sort="new">Свежие</button>
+      <button class="chip active" data-sort="new">Все</button>
       <button class="chip" data-sort="top">Популярные</button>
+      <button class="chip" data-sort="me">Мои видео</button>
     </div>
-    <p class="muted" id="searchHint" hidden style="margin:-12px 0 18px"></p>
+    <p class="muted" id="searchHint" hidden style="margin:-8px 0 16px"></p>
     <div class="grid" id="grid"></div>
     <div class="empty" id="emptyHome" hidden>
       <div class="empty-icon">🎬</div>
       <h2>Здесь пока пусто</h2>
       <p class="muted">Станьте первым автором — загрузите видео.</p>
+    </div>
+  </section>
+
+  <!-- шортсы -->
+  <section id="view-shorts" hidden>
+    <h1 class="page-title">Shorts</h1>
+    <div class="shorts-feed" id="shortsFeed"></div>
+    <div class="empty" id="emptyShorts" hidden>
+      <div class="empty-icon">🎞</div>
+      <h2>Shorts пока нет</h2>
+      <p class="muted">Загрузите вертикальное видео с галочкой «Это Shorts».</p>
+    </div>
+  </section>
+
+  <!-- лента подписок -->
+  <section id="view-feed" hidden>
+    <h1 class="page-title">Подписки</h1>
+    <div class="grid" id="feedGrid"></div>
+    <div class="empty" id="emptyFeed" hidden>
+      <div class="empty-icon">📺</div>
+      <h2>Лента пуста</h2>
+      <p class="muted">Подпишитесь на каналы — их новые видео появятся здесь.</p>
     </div>
   </section>
 
@@ -58,48 +111,47 @@
             <span class="avatar-slot" id="wAva"></span>
             <div class="watch-author-info">
               <b id="wAuthor"></b>
-              <span class="muted" id="wDate"></span>
+              <span class="muted" id="wSubs"></span>
             </div>
-            <button class="btn btn-outline" id="subBtn" hidden>Подписаться</button>
+            <button class="btn-sub" id="subBtn" hidden>Подписаться</button>
           </div>
           <div class="watch-actions">
             <div class="rate-group">
               <button class="pill-btn" id="likeBtn" title="Нравится">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18.77 11h-4.23l1.52-4.94C16.38 5.03 15.54 4 14.38 4c-.58 0-1.14.24-1.52.65L7 11H3v10h4h1h9.43c1.06 0 1.98-.67 2.19-1.61l1.34-6C21.23 12.15 20.18 11 18.77 11zM7 20H4v-8h3zm12.98-6.74l-1.34 6c-.05.22-.24.74-.86.74H8v-8.61l5.6-6.06c.07-.08.18-.13.32-.13.13 0 .42.14.34.42l-1.63 5.32H18.77c.62 0 1.15.47 1.21 1.02z"/></svg>
                 <span id="likeCount">0</span>
               </button>
               <span class="rate-sep"></span>
               <button class="pill-btn flip" id="dislikeBtn" title="Не нравится">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18.77 11h-4.23l1.52-4.94C16.38 5.03 15.54 4 14.38 4c-.58 0-1.14.24-1.52.65L7 11H3v10h4h1h9.43c1.06 0 1.98-.67 2.19-1.61l1.34-6C21.23 12.15 20.18 11 18.77 11zM7 20H4v-8h3zm12.98-6.74l-1.34 6c-.05.22-.24.74-.86.74H8v-8.61l5.6-6.06c.07-.08.18-.13.32-.13.13 0 .42.14.34.42l-1.63 5.32H18.77c.62 0 1.15.47 1.21 1.02z"/></svg>
               </button>
             </div>
-
-            <!-- скорость воспроизведения -->
-            <div class="speed-wrap">
-              <button class="pill-btn" id="speedBtn" title="Скорость воспроизведения">⚡ <span id="speedLabel">1×</span></button>
-              <div class="speed-menu" id="speedMenu" hidden></div>
-            </div>
-
             <button class="pill-btn" id="shareBtn">
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M15 5.63L20.66 12 15 18.37V14h-1c-3.96 0-7.14 1-9.75 3.09 1.84-4.07 5.11-6.4 9.89-7.1l.86-.13z"/></svg>
               Поделиться
             </button>
+            <div class="speed-wrap">
+              <button class="pill-btn" id="speedBtn" title="Скорость">⚡ <span id="speedLabel">1×</span></button>
+              <div class="speed-menu" id="speedMenu" hidden></div>
+            </div>
             <button class="pill-btn danger" id="deleteBtn" hidden title="Удалить">
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7H6zM19 4h-3.5l-1-1h-5l-1 1H5v2h14z"/></svg>
             </button>
           </div>
         </div>
 
-        <div class="desc open">
+        <div class="desc" id="descBox">
           <p class="desc-head"><b id="wViews"></b></p>
           <div class="desc-text" id="wDesc"></div>
+          <button class="desc-toggle" id="descToggle">Ещё</button>
         </div>
 
         <section class="comments">
           <h2 class="section-title"><span id="commentsCount">0</span> комментариев</h2>
           <form id="commentForm" class="comment-form" hidden>
-            <input id="commentInput" maxlength="2000" placeholder="Написать комментарий…" autocomplete="off" required>
-            <button class="btn btn-accent" type="submit">Отправить</button>
+            <span class="avatar-slot sm" id="commentAva"></span>
+            <input id="commentInput" maxlength="2000" placeholder="Введите текст комментария" autocomplete="off" required>
+            <button class="btn-blue" type="submit">Отправить</button>
           </form>
           <p class="muted" id="commentHint" hidden>Чтобы комментировать, <a href="#" id="loginLink">войдите</a>.</p>
           <div id="commentsList"></div>
@@ -107,7 +159,6 @@
       </div>
 
       <aside class="watch-next">
-        <h2 class="section-title">Далее</h2>
         <div id="nextList"></div>
       </aside>
     </div>
@@ -121,20 +172,22 @@
         <label class="dropzone" id="dropzone">
           <input type="file" id="videoFile" accept="video/mp4,video/webm,video/ogg,video/quicktime" hidden>
           <div class="dz-icon">
-            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor"><path d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6z"/></svg>
           </div>
-          <p><b>Перетащите видео сюда</b> или нажмите для выбора файла</p>
+          <p><b>Перетащите видео сюда</b> или нажмите для выбора</p>
           <p class="muted" id="fileMeta">MP4, WebM, MOV или OGG · до 2 ГБ</p>
         </label>
         <div class="progress" id="progressWrap" hidden><div class="progress-bar" id="progressBar"></div></div>
-
         <label class="field"><span>Название <b class="req">*</b></span>
           <input id="upTitle" maxlength="200" required placeholder="Моё первое видео">
         </label>
         <label class="field"><span>Описание</span>
           <textarea id="upDesc" rows="5" maxlength="5000" placeholder="О чём это видео…"></textarea>
         </label>
-        <button class="btn btn-accent btn-lg" id="publishBtn" type="submit">Опубликовать</button>
+        <label class="check-row">
+          <input type="checkbox" id="upShort"> Это Shorts — вертикальное видео
+        </label>
+        <button class="btn-blue btn-lg" id="publishBtn" type="submit">Опубликовать</button>
       </form>
     </div>
   </section>
@@ -161,10 +214,11 @@
 
 </main>
 
-<!-- модальное окно входа/регистрации -->
+<!-- вход / регистрация -->
 <div class="modal-wrap" id="authModal" hidden>
   <div class="modal">
     <button class="icon-btn modal-close" id="authClose" aria-label="Закрыть">✕</button>
+    <div class="modal-logo"><span class="logo-mark">▶</span> RuVideo</div>
     <div class="tabs">
       <button class="tab active" data-tab="login" type="button">Вход</button>
       <button class="tab" data-tab="register" type="button">Регистрация</button>
@@ -175,7 +229,7 @@
       <label class="field"><span>Пароль</span>
         <input id="authPass" type="password" required minlength="6" autocomplete="current-password"></label>
       <p class="form-error" id="authError"></p>
-      <button class="btn btn-accent btn-lg" type="submit" id="authSubmit">Войти</button>
+      <button class="btn-blue btn-lg" type="submit" id="authSubmit">Войти</button>
     </form>
   </div>
 </div>

@@ -1,5 +1,5 @@
 """
-RuVideo — видеохостинг: файлы, лайки, подписки, студия с комментариями.
+RuVideo — видеохостинг в стиле YouTube: видео, Shorts, лента подписок, студия.
 Запуск:  python server.py  →  http://127.0.0.1:5000
 """
 import os
@@ -21,7 +21,8 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY', 'dev-key')
-app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 ** 3   # 2 ГБ
+app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 ** 3
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 86400 * 30
 
 
 # ────────────────────── база данных ──────────────────────
@@ -78,13 +79,14 @@ def init_db():
             PRIMARY KEY (subscriber_id, channel_id)
         );
         ''')
-        # мягкие миграции для старых баз
         ucols = [r[1] for r in db.execute('PRAGMA table_info(users)')]
         if 'avatar' not in ucols:
             db.execute("ALTER TABLE users ADD COLUMN avatar TEXT DEFAULT ''")
         vcols = [r[1] for r in db.execute('PRAGMA table_info(videos)')]
         if 'source' not in vcols:
             db.execute("ALTER TABLE videos ADD COLUMN source TEXT DEFAULT ''")
+        if 'kind' not in vcols:
+            db.execute("ALTER TABLE videos ADD COLUMN kind TEXT DEFAULT 'video'")
 
 
 # ────────────────────── помощники ──────────────────────
@@ -124,13 +126,19 @@ def video_row(row):
         r = db.execute('SELECT value FROM likes WHERE video_id=? AND user_id=?',
                        (vid, session['uid'])).fetchone()
         my = r['value'] if r else 0
+    subscribed = False
+    if session.get('uid') and row['user_id'] != session['uid']:
+        subscribed = bool(db.execute(
+            'SELECT 1 FROM subs WHERE subscriber_id=? AND channel_id=?',
+            (session['uid'], row['user_id'])).fetchone())
     return {
         'id': vid, 'title': row['title'], 'description': row['description'],
         'src': f"/static/uploads/{row['filename']}",
         'views': row['views'], 'created': row['created'],
         'author': author['username'], 'author_avatar': avatar_url(author['avatar']),
         'likes': likes, 'comments': comments, 'my': my,
-        'source': row['source'],
+        'source': row['source'], 'kind': row['kind'] or 'video',
+        'subscribed': subscribed,
         'mine': session.get('uid') == row['user_id'],
     }
 
@@ -255,12 +263,27 @@ def subscribe(username):
 @app.get('/api/videos')
 def api_videos():
     q = request.args.get('q', '').strip()
+    kind = request.args.get('kind', '').strip()
     db = get_db()
     if q:
         rows = db.execute('SELECT * FROM videos WHERE title LIKE ? OR description LIKE ? '
                           'ORDER BY views DESC', (f'%{q}%', f'%{q}%')).fetchall()
+    elif kind:
+        rows = db.execute('SELECT * FROM videos WHERE kind=? ORDER BY id DESC', (kind,)).fetchall()
     else:
         rows = db.execute('SELECT * FROM videos ORDER BY id DESC').fetchall()
+    return jsonify(videos=[video_row(r) for r in rows])
+
+
+@app.get('/api/feed')
+@login_required
+def feed():
+    db = get_db()
+    rows = db.execute('''
+        SELECT v.* FROM videos v
+        JOIN subs s ON s.channel_id = v.user_id
+        WHERE s.subscriber_id = ?
+        ORDER BY v.id DESC''', (session['uid'],)).fetchall()
     return jsonify(videos=[video_row(r) for r in rows])
 
 
@@ -269,31 +292,24 @@ def api_videos():
 def upload_video():
     title = (request.form.get('title') or '').strip()
     desc = (request.form.get('description') or '').strip()
+    kind = 'short' if request.form.get('kind') == 'short' else 'video'
     f = request.files.get('video')
     if not title:
-        print('[ЭФИР] ✗ Отклонено: пустое название')
         return jsonify(error='Введите название'), 400
     if not f or not f.filename:
-        print('[ЭФИР] ✗ Отклонено: файл не выбран')
         return jsonify(error='Выберите видеофайл'), 400
     ext = f.filename.rsplit('.', 1)[-1].lower() if '.' in f.filename else ''
     if ext not in ALLOWED_VIDEO:
-        print(f'[ЭФИР] ✗ Отклонено: формат .{ext} не поддерживается')
         return jsonify(error='Только mp4, webm, ogg или mov'), 400
-
     name = f'{uuid.uuid4().hex}.{ext}'
-    print(f'[ЭФИР] Принято: "{title}" ({f.filename}) → сохраняем как {name} …')
     try:
         f.save(os.path.join(UPLOAD_DIR, name))
     except Exception as e:
-        print('[ЭФИР] ✗ ОШИБКА сохранения файла:', e)
         return jsonify(error=f'Не удалось сохранить файл: {e}'), 500
-
     db = get_db()
-    cur = db.execute('INSERT INTO videos (title, description, filename, user_id) VALUES (?,?,?,?)',
-                     (title, desc, name, session['uid']))
+    cur = db.execute('INSERT INTO videos (title, description, filename, user_id, kind) VALUES (?,?,?,?,?)',
+                     (title, desc, name, session['uid'], kind))
     db.commit()
-    print(f'[ЭФИР] ✓ Видео сохранено! id={cur.lastrowid}')
     return jsonify(id=cur.lastrowid), 201
 
 
@@ -384,7 +400,7 @@ def add_comment(vid):
     return jsonify(ok=True), 201
 
 
-# ────────────────────── студия (аналитика + комментарии) ──────────────────────
+# ────────────────────── студия ──────────────────────
 
 @app.get('/api/studio')
 @login_required
@@ -403,7 +419,7 @@ def studio():
                (SELECT COUNT(*) FROM likes l WHERE l.video_id=v.id AND l.value=1) AS likes,
                (SELECT COUNT(*) FROM comments c WHERE c.video_id=v.id) AS comments
         FROM videos v WHERE v.user_id=? ORDER BY v.views DESC''', (uid,)).fetchall()
-    recent_comments = db.execute('''
+    recent = db.execute('''
         SELECT c.id, c.text, c.created,
                u.username AS author, u.avatar AS author_avatar,
                v.id AS video_id, v.title AS video_title
@@ -420,7 +436,7 @@ def studio():
             'id': r['id'], 'text': r['text'], 'created': r['created'],
             'author': r['author'], 'author_avatar': avatar_url(r['author_avatar']),
             'video_id': r['video_id'], 'video_title': r['video_title'],
-        } for r in recent_comments])
+        } for r in recent])
 
 
 @app.errorhandler(413)
